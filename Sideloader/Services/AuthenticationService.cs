@@ -20,7 +20,7 @@ namespace Sideloader.Services
                     AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
                 };
 
-                HttpClient httpClient = new HttpClient(handler);
+                WebClient.HttpClient = new HttpClient(handler);
                 var pairs = new List<KeyValuePair<string, string>>
                 {
                     new KeyValuePair<string, string>("username", username),
@@ -28,12 +28,12 @@ namespace Sideloader.Services
                     new KeyValuePair<string, string>("Login", "Submit")
                 };
                 var stringContent = new FormUrlEncodedContent(pairs);
-                httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
-                httpClient.DefaultRequestHeaders.Add("Referer",
+                WebClient.HttpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
+                WebClient.HttpClient.DefaultRequestHeaders.Add("Referer",
                     "http://builds.showpad.com/showpad/showpad/windows?download=1");
-                httpClient.DefaultRequestHeaders.Add("Accept",
+                WebClient.HttpClient.DefaultRequestHeaders.Add("Accept",
                     "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
-                var response = await httpClient.PostAsync(new Uri("http://builds.showpad.com/login.php"), stringContent);
+                var response = await WebClient.HttpClient.PostAsync(new Uri("http://builds.showpad.com/login.php"), stringContent);
                 report.IsSuccessful = response.IsSuccessStatusCode;
             }
             catch (WebException webException)

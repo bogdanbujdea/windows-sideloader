@@ -15,7 +15,7 @@ namespace Sideloader.Tests.ViewModels
         public void SetupTests()
         {
             _settingsMock = new Mock<ISettingsRepository>();
-            _viewModel = new MainViewModel(_settingsMock.Object);
+            _viewModel = new MainViewModel(_settingsMock.Object, null);
         }
 
         [Test]

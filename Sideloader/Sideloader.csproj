@@ -62,14 +62,19 @@
     <Compile Include="Converters\ReversedBooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Services\AuthenticationService.cs" />
+    <Compile Include="Services\BuildsDownloader.cs" />
     <Compile Include="Services\IAuthenticationService.cs" />
+    <Compile Include="Services\IBuildsDownloader.cs" />
     <Compile Include="Services\Report.cs" />
+    <Compile Include="Services\WebClient.cs" />
     <Compile Include="Settings\ILogger.cs" />
     <Compile Include="Settings\ISettingsRepository.cs" />
     <Compile Include="Settings\Logger.cs" />
     <Compile Include="Settings\SettingsKey.cs" />
     <Compile Include="Settings\SettingsRepository.cs" />
+    <Compile Include="Models\AppPackage.cs" />
     <Compile Include="ViewModels\AuthenticationViewModel.cs" />
+    <Compile Include="Models\Build.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="Views\MainView.xaml.cs">
@@ -112,9 +117,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

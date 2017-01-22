@@ -5,8 +5,48 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:Sideloader.ViewModels"
         mc:Ignorable="d"
-        Title="MainView" Height="300" Width="300" d:DataContext="{d:DesignInstance viewModels:MainViewModel}">
+        Title="MainView" Height="600" Width="600" d:DataContext="{d:DesignInstance viewModels:MainViewModel}">
+    <Window.Resources>
+        <Style TargetType="TextBlock" x:Key="PackageTextStyle">
+            <Setter Property="TextDecorations" Value="Underline"></Setter>
+            <Setter Property="Foreground" Value="DodgerBlue"></Setter>
+            <Setter Property="VerticalAlignment" Value="Center"></Setter>
+        </Style>
+        
+    </Window.Resources>
     <Grid>
+        <Grid x:Name="SideloaderGrid" Margin="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid x:Name="SearchGrid" Grid.ColumnSpan="4">
+                    <TextBox Text="{Binding SearchText, Mode=TwoWay}"></TextBox>
+                </Grid>
+                <ItemsControl x:Name="Builds" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" ItemsSource="{Binding Builds}" Margin="0">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="Gray" BorderThickness="0 0 0 1" Padding="0 5">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="350"></ColumnDefinition>
+                                        <ColumnDefinition Width="50"></ColumnDefinition>
+                                        <ColumnDefinition Width="50"></ColumnDefinition>
+                                        <ColumnDefinition Width="50"></ColumnDefinition>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="14" TextWrapping="Wrap"></TextBlock>
+                                    <TextBlock Grid.Column="1" Style="{StaticResource PackageTextStyle}" Text="xARM"></TextBlock>
+                                    <TextBlock Grid.Column="2" Style="{StaticResource PackageTextStyle}" Text="x86"></TextBlock>
+                                    <TextBlock Grid.Column="3" Style="{StaticResource PackageTextStyle}" Text="x64"></TextBlock>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </Grid>
         <Grid x:Name="LoginGrid" Visibility="{Binding AuthenticationViewModel.UserIsLoggedIn, Mode=TwoWay, Converter={StaticResource ReversedBooleanToVisibilityConverter}}">
             <Grid x:Name="LoginPanel" DataContext="{Binding AuthenticationViewModel, Mode=TwoWay}">
                 <Grid.RowDefinitions>

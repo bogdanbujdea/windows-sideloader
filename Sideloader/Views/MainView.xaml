@@ -3,13 +3,21 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Sideloader.Views"
         xmlns:viewModels="clr-namespace:Sideloader.ViewModels"
         mc:Ignorable="d"
-        Title="MainView" Height="300" Width="300">
-    <Window.DataContext>
-        <viewModels:MainViewModel></viewModels:MainViewModel
-        ></Window.DataContext>
+        Title="MainView" Height="300" Width="300" d:DataContext="{d:DesignInstance viewModels:MainViewModel}">
     <Grid>
+        <Grid x:Name="LoginGrid" Visibility="{Binding AuthenticationViewModel.UserIsLoggedIn, Mode=TwoWay, Converter={StaticResource ReversedBooleanToVisibilityConverter}}">
+            <Grid x:Name="LoginPanel" DataContext="{Binding AuthenticationViewModel, Mode=TwoWay}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"></RowDefinition>
+                    <RowDefinition Height="50"></RowDefinition>
+                    <RowDefinition Height="50"></RowDefinition>
+                </Grid.RowDefinitions>
+                <TextBox x:Name="Username" Text="{Binding Username, Mode=TwoWay}" Margin="10"></TextBox>
+                <PasswordBox x:Name="Password" Grid.Row="1" Margin="10"></PasswordBox>
+                <Button x:Name="LoginButton" Content="Login" Grid.Row="2" Click="Login" Width="200" Margin="10"></Button>
+            </Grid>
+        </Grid>
     </Grid>
 </Window>

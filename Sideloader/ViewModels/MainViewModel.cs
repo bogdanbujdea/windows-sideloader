@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Sideloader.Services;
 using Sideloader.Settings;
@@ -12,11 +14,17 @@ namespace Sideloader.ViewModels
         private readonly BuildsDownloader _buildsDownloader;
         private ObservableCollection<Build> _builds;
         private string _searchText;
+        private List<Build> _allBuilds;
+        private bool _isBusy;
 
         public MainViewModel()
         {
             AuthenticationViewModel = new AuthenticationViewModel(null, null);
             AuthenticationViewModel.UserIsLoggedIn = true;
+            Builds = new ObservableCollection<Build>
+            {
+                new Build {Name = "Branch feature_SWA-1388_update_salesforce_connect_button"}
+            };
         }
 
         public MainViewModel(ISettingsRepository settingsRepository, BuildsDownloader buildsDownloader)
@@ -24,10 +32,6 @@ namespace Sideloader.ViewModels
             _settingsRepository = settingsRepository;
             _buildsDownloader = buildsDownloader;
             AuthenticationViewModel = new AuthenticationViewModel(settingsRepository, new AuthenticationService());
-            Builds = new ObservableCollection<Build>
-            {
-                new Build {Name = "Branch feature_SWA-1388_update_salesforce_connect_button"}
-            };
         }
 
         public AuthenticationViewModel AuthenticationViewModel { get; set; }
@@ -48,17 +52,27 @@ namespace Sideloader.ViewModels
             set
             {
                 _searchText = value;
-                if (_searchText.Length > 2)
-                {
-                    FilterBuilds();
-                }
+                FilterBuilds();
+                OnPropertyChanged();
+            }
+        }
+
+        public bool IsBusy
+        {
+            get { return _isBusy; }
+            set
+            {
+                _isBusy = value;
                 OnPropertyChanged();
             }
         }
 
         private void FilterBuilds()
         {
-
+            if (string.IsNullOrWhiteSpace(SearchText))
+                Builds = new ObservableCollection<Build>(_allBuilds);
+            else
+                Builds = new ObservableCollection<Build>(_allBuilds.Where(b => b.Name.ToLower().Contains(SearchText.ToLower())));
         }
 
         public async Task LoginUser()
@@ -70,16 +84,27 @@ namespace Sideloader.ViewModels
 
         public async Task Initialize()
         {
-            var userName = _settingsRepository.GetValue(SettingsKey.Username);
-            var password = _settingsRepository.GetValue(SettingsKey.Password);
-            if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
+            IsBusy = true;
+            try
             {
-                AuthenticationViewModel.UserIsLoggedIn = false;
+                var userName = _settingsRepository.GetValue(SettingsKey.Username);
+                var password = _settingsRepository.GetValue(SettingsKey.Password);
+                if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
+                {
+                    AuthenticationViewModel.UserIsLoggedIn = false;
+                }
+                else
+                {
+                    AuthenticationViewModel.UserIsLoggedIn = true;
+                    await GetBuilds();
+                }
             }
-            else
+            catch (Exception)
             {
-                AuthenticationViewModel.UserIsLoggedIn = true;
-                await GetBuilds();
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
 
@@ -88,6 +113,8 @@ namespace Sideloader.ViewModels
             try
             {
                 var builds = await _buildsDownloader.GetBuilds();
+                Builds = new ObservableCollection<Build>(builds);
+                _allBuilds = builds.ToList();
             }
             catch (UnauthorizedAccessException accessException)
             {

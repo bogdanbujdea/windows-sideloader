@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -25,7 +26,7 @@ namespace Sideloader.Services
             {
                 var report = await
                     _authenticationService.LoginAsync(SettingsRepository.Instance.GetValue(SettingsKey.Username), SettingsRepository.Instance.GetValue(SettingsKey.Password));
-                if(report.IsSuccessful == false)
+                if (report.IsSuccessful == false)
                     throw new UnauthorizedAccessException();
             }
             string htmlText = string.Empty;
@@ -44,31 +45,64 @@ namespace Sideloader.Services
             return ExtractBuildsFromHtml(htmlText);
         }
 
-        private List<Build> ExtractBuildsFromHtml(string htmlText)
+        public List<Build> ExtractBuildsFromHtml(string htmlText)
         {
-            throw new NotImplementedException();
-        }
-
-        /* private List<Build> ExtractBuildsFromHtml(string htmlText)
-        {
+            htmlText = File.ReadAllText("builds.html");
             var htmlDocument = new HtmlDocument();
             htmlDocument.LoadHtml(htmlText);
-            foreach (HtmlNode linkNode in htmlDocument.DocumentNode.SelectNodes("//a[@href]"))
+            var builds = new List<Build>();
+            var packagesList = new Dictionary<string, List<AppPackage>>();
+            var htmlNodeCollection = htmlDocument.DocumentNode.Descendants("h4").ToList();
+            var orderedLists = htmlDocument.DocumentNode.Descendants("ol").ToList();
+            for (int index = 0; index < orderedLists.Count; index++)
             {
-                Debug.WriteLine(linkNode.Name + " : " + linkNode.Attributes);
-                var attr =
-                    linkNode.Attributes.FirstOrDefault(a => a.Name == "href" && a.Value.Contains("SWA-"));
-                if (attr != null)
+                packagesList[htmlNodeCollection[index].InnerText] = new List<AppPackage>();
+                var list = orderedLists[index];
+                var links = list.Descendants("a").ToList();
+                foreach (var node in links)
                 {
-                    if (IsValidUri(attr.Value))
+                    Debug.WriteLine(node.Name + " : " + node.Attributes);
+                    if (IsValidUri(node.Attributes[0].Value))
                     {
-                        var urlDecode = WebUtility.HtmlDecode(attr.Value);
-                        downloadLinks.Add(new AppPackage(urlDecode));
-                        Debug.WriteLine(attr.Name + " : " + attr.Value);
+                        var appPackage = new AppPackage() { DownloadUrl = node.Attributes[0].Value };
+                        if (node.InnerText.Contains("Download (RT)"))
+                        {
+                            appPackage.PackageType = PackageType.ARM;
+                        }
+                        else if (node.InnerText.Contains("Download (x86)"))
+                        {
+                            appPackage.PackageType = PackageType.x86;
+                        }
+                        else if (node.InnerText.Contains("Download (x64)"))
+                        {
+                            appPackage.PackageType = PackageType.x64;
+                        }
+                        packagesList[htmlNodeCollection[index].InnerText].Add(appPackage);
                     }
                 }
             }
-        }*/
+            foreach (var package in packagesList)
+            {
+                var build = new Build { Name = package.Key };
+                foreach (var appPackage in package.Value)
+                {
+                    switch (appPackage.PackageType)
+                    {
+                        case PackageType.ARM:
+                            build.ARMBuild = appPackage;
+                            break;
+                        case PackageType.x86:
+                            build.X86Build = appPackage;
+                            break;
+                        case PackageType.x64:
+                            build.X64Build = appPackage;
+                            break;
+                    }
+                }
+                builds.Add(build);
+            }
+            return builds;
+        }
 
         private List<AppPackage> ExtractLinksFromHtml(string htmlText, string ticketNumber)
         {
@@ -85,7 +119,7 @@ namespace Sideloader.Services
                     if (IsValidUri(attr.Value))
                     {
                         var urlDecode = WebUtility.HtmlDecode(attr.Value);
-                        downloadLinks.Add(new AppPackage(urlDecode));
+                        //downloadLinks.Add(new AppPackage(urlDecode));
                         Debug.WriteLine(attr.Name + " : " + attr.Value);
                     }
                 }

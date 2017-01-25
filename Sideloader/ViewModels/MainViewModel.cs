@@ -19,6 +19,7 @@ namespace Sideloader.ViewModels
         private List<Build> _allBuilds;
         private bool _isBusy;
         private readonly IPackageManager _packageManager;
+        private string _statusMessage;
 
         public MainViewModel()
         {
@@ -35,7 +36,7 @@ namespace Sideloader.ViewModels
             _settingsRepository = settingsRepository;
             _buildsDownloader = buildsDownloader;
             _packageManager = packageManager;
-           /* var builds = _buildsDownloader.ExtractBuildsFromHtml("");
+            var builds = _buildsDownloader.ExtractBuildsFromHtml("");
             builds[0] = new Build
             {
                 X86Build =
@@ -43,11 +44,11 @@ namespace Sideloader.ViewModels
                     {
                         Platform = new Platform(PlatformType.x86),
                         DownloadUrl =
-                            "http://buildsshowpad.s3.amazonaws.com/showpad/showpad/windows/Other/bugfix_SWA-1375_app_unresponsive_refreshing_announcements/20170124-171132/Showpad.Windows_1.5.5.0_x86_Test.zip?AWSAccessKeyId=AKIAJ5YT5QKDEUF5YCQA&Expires=1485306534&Signature=pKI7yGD4%2BNdWlOtwY2%2BfX60WeUU%3D"
+                            "file:///C:/Users/bogda/Downloads/Showpad.Windows_1.5.5.0_x64_Test.zip"
                     },
                 Name = "1.5"
             };
-             Builds = new ObservableCollection<Build>(builds);*/
+            Builds = new ObservableCollection<Build>(builds);
             AuthenticationViewModel = new AuthenticationViewModel(settingsRepository, new AuthenticationService());
         }
 
@@ -80,6 +81,16 @@ namespace Sideloader.ViewModels
             set
             {
                 _isBusy = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string StatusMessage
+        {
+            get { return _statusMessage; }
+            set
+            {
+                _statusMessage = value;
                 OnPropertyChanged();
             }
         }
@@ -129,6 +140,7 @@ namespace Sideloader.ViewModels
         {
             try
             {
+                return;
                 var builds = await _buildsDownloader.GetBuilds();
                 Builds = new ObservableCollection<Build>(builds);
                 _allBuilds = builds.ToList();
@@ -149,16 +161,43 @@ namespace Sideloader.ViewModels
             try
             {
                 IsBusy = true;
+                _packageManager.PackageStatusChanged += StatusChanged;
                 await _packageManager.RetrievePackage(appPackage);
+                var build = Builds.FirstOrDefault(
+                    b => b.X64Build == appPackage || b.X86Build == appPackage || b.ARMBuild == appPackage);
+                MessageBox.Show(build.Name + " was successfully installed!");
+            }
+            catch (PackageException packageException)
+            {
+                if (packageException.IsHandled == false)
+                {
+                    StatusChanged(this, new StatusInfo(MessageType.Error, packageException.Message));
+                    Logger.Instance.Error(packageException);
+                }
             }
             catch (Exception exception)
             {
+                StatusChanged(this, new StatusInfo(MessageType.Error, exception.Message));
                 Logger.Instance.Error(exception);
             }
             finally
             {
                 IsBusy = false;
             }
-        }        
+        }
+
+        private void StatusChanged(object sender, StatusInfo e)
+        {
+            if (e.MessageType == MessageType.Info)
+            {
+                StatusMessage = e.Message;
+            }
+            else
+            {
+                StatusMessage = string.Empty;
+                MessageBox.Show(e.Message);
+                IsBusy = false;
+            }
+        }
     }
 }

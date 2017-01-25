@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:Sideloader.ViewModels"
         mc:Ignorable="d"
-        Title="MainView" Height="600" Width="600" d:DataContext="{d:DesignInstance viewModels:MainViewModel}">
+        ResizeMode="NoResize"        
+        WindowStyle="ThreeDBorderWindow"        
+        Title="Windows Sideloader" Height="600" Width="700" d:DataContext="{d:DesignInstance viewModels:MainViewModel}">
     <Window.Resources>
         <Style TargetType="TextBlock" x:Key="PackageTextStyle">
             <Setter Property="TextDecorations" Value="Underline"></Setter>
@@ -14,33 +16,44 @@
         </Style>
         
     </Window.Resources>
-    <Grid>
-        <Grid x:Name="SideloaderGrid" Margin="10">
-            <Grid>
+    <Grid Background="#F7F7F7">
+        <Grid x:Name="SideloaderGrid">
+            <Grid Margin="10">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition Height="60"></RowDefinition>
                     <RowDefinition Height="30"></RowDefinition>
                     <RowDefinition Height="*"></RowDefinition>
                 </Grid.RowDefinitions>
-                <Grid x:Name="SearchGrid" Grid.ColumnSpan="4">
-                    <TextBox Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Padding="5 0"></TextBox>
+                <StackPanel x:Name="SearchGrid" Grid.ColumnSpan="4">
+                    <TextBlock Text="Search" VerticalAlignment="Center" FontWeight="SemiBold" FontFamily="Segoe UI"></TextBlock>
+                    <TextBox Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Padding="2 0"></TextBox>
+                </StackPanel>
+                <Grid Grid.Row="2" VerticalAlignment="Top" Height="30">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="450"></ColumnDefinition>
+                        <ColumnDefinition Width="50"></ColumnDefinition>
+                        <ColumnDefinition Width="50"></ColumnDefinition>
+                        <ColumnDefinition Width="50"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Build name" VerticalAlignment="Center" FontWeight="SemiBold" FontFamily="Segoe UI"></TextBlock>
+                    <TextBlock Grid.Column="1" Grid.ColumnSpan="3" Text="Platforms" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="SemiBold" FontFamily="Segoe UI"></TextBlock>
                 </Grid>
-                <ScrollViewer Grid.Row="2" Grid.Column="0" Height="450">
+                <ScrollViewer Grid.Row="2" Grid.Column="0" Margin="0 30 0 0" Height="450">
                     <ItemsControl x:Name="Builds" ItemsSource="{Binding Builds}" Margin="0">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border BorderBrush="Gray" BorderThickness="0 0 0 1" Padding="0 5">
-                                    <Grid>
+                                <Border BorderBrush="Gray" Background="White" BorderThickness="1" Padding="0 5">
+                                    <Grid VerticalAlignment="Center" Margin="10 0">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="350"></ColumnDefinition>
+                                            <ColumnDefinition Width="450"></ColumnDefinition>
                                             <ColumnDefinition Width="50"></ColumnDefinition>
                                             <ColumnDefinition Width="50"></ColumnDefinition>
                                             <ColumnDefinition Width="50"></ColumnDefinition>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="14" TextWrapping="Wrap"></TextBlock>
-                                        <TextBlock Grid.Column="1" Style="{StaticResource PackageTextStyle}" PreviewMouseDown="DownloadArmPackage" Text="ARM"></TextBlock>
-                                        <TextBlock Grid.Column="2" Style="{StaticResource PackageTextStyle}" PreviewMouseDown="Downloadx86Package" Text="x86"></TextBlock>
-                                        <TextBlock Grid.Column="3" Style="{StaticResource PackageTextStyle}" PreviewMouseDown="Downloadx64Package" Text="x64"></TextBlock>
+                                        <TextBlock Grid.Column="1" Style="{StaticResource PackageTextStyle}" HorizontalAlignment="Center" PreviewMouseDown="DownloadArmPackage" Text="ARM"></TextBlock>
+                                        <TextBlock Grid.Column="2" Style="{StaticResource PackageTextStyle}" HorizontalAlignment="Center" PreviewMouseDown="Downloadx86Package" Text="x86"></TextBlock>
+                                        <TextBlock Grid.Column="3" Style="{StaticResource PackageTextStyle}" HorizontalAlignment="Center" PreviewMouseDown="Downloadx64Package" Text="x64"></TextBlock>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
@@ -49,7 +62,7 @@
                 </ScrollViewer>
             </Grid>
         </Grid>
-        <Grid x:Name="LoginGrid" Visibility="{Binding AuthenticationViewModel.UserIsLoggedIn, Mode=TwoWay, Converter={StaticResource ReversedBooleanToVisibilityConverter}}">
+        <Grid x:Name="LoginGrid" Height="0" Visibility="{Binding AuthenticationViewModel.UserIsLoggedIn, Mode=TwoWay, Converter={StaticResource ReversedBooleanToVisibilityConverter}}">
             <Grid x:Name="LoginPanel" DataContext="{Binding AuthenticationViewModel, Mode=TwoWay}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50"></RowDefinition>
@@ -61,6 +74,13 @@
                 <Button x:Name="LoginButton" Content="Login" Grid.Row="2" Click="Login" Width="200" Margin="10"></Button>
             </Grid>
         </Grid>
-        <ProgressBar IsIndeterminate="True" Height="15" Visibility="{Binding IsBusy, Mode=TwoWay, Converter={StaticResource BooleanToVisibilityConverter}}" VerticalAlignment="Bottom"></ProgressBar>
+        <Grid Visibility="{Binding IsBusy, Mode=TwoWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid Background="White" Opacity="0.8" Visibility="{Binding IsBusy, Mode=TwoWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+            </Grid>
+            <StackPanel VerticalAlignment="Center" Background="White">
+                <TextBlock HorizontalAlignment="Center" Text="{Binding StatusMessage}" FontSize="14"></TextBlock>
+                <ProgressBar IsIndeterminate="True" Height="15" Margin="0 10 0 0" VerticalAlignment="Bottom"></ProgressBar>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

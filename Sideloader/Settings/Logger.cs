@@ -62,13 +62,8 @@ namespace Sideloader.Settings
 
         public void SaveLogSession()
         {
-            SaveTextFile();
-        }
-
-        private void SaveTextFile()
-        {
             var sb = new StringBuilder();
-            sb.Append("Sesiune: " + _session);
+            sb.Append("Session: " + _session);
             foreach (var info in _events)
             {
                 sb.Append(info).Append(Environment.NewLine);

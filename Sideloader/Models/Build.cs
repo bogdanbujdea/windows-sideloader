@@ -1,4 +1,4 @@
-﻿namespace Sideloader.ViewModels
+﻿namespace Sideloader.Models
 {
     public class Build
     {

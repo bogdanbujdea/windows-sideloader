@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
+using Sideloader.Models;
 using Sideloader.Services;
 using Sideloader.Settings;
 
@@ -16,6 +18,7 @@ namespace Sideloader.ViewModels
         private string _searchText;
         private List<Build> _allBuilds;
         private bool _isBusy;
+        private readonly IPackageManager _packageManager;
 
         public MainViewModel()
         {
@@ -27,10 +30,24 @@ namespace Sideloader.ViewModels
             };
         }
 
-        public MainViewModel(ISettingsRepository settingsRepository, BuildsDownloader buildsDownloader)
+        public MainViewModel(ISettingsRepository settingsRepository, BuildsDownloader buildsDownloader, IPackageManager packageManager)
         {
             _settingsRepository = settingsRepository;
             _buildsDownloader = buildsDownloader;
+            _packageManager = packageManager;
+           /* var builds = _buildsDownloader.ExtractBuildsFromHtml("");
+            builds[0] = new Build
+            {
+                X86Build =
+                    new AppPackage
+                    {
+                        Platform = new Platform(PlatformType.x86),
+                        DownloadUrl =
+                            "http://buildsshowpad.s3.amazonaws.com/showpad/showpad/windows/Other/bugfix_SWA-1375_app_unresponsive_refreshing_announcements/20170124-171132/Showpad.Windows_1.5.5.0_x86_Test.zip?AWSAccessKeyId=AKIAJ5YT5QKDEUF5YCQA&Expires=1485306534&Signature=pKI7yGD4%2BNdWlOtwY2%2BfX60WeUU%3D"
+                    },
+                Name = "1.5"
+            };
+             Builds = new ObservableCollection<Build>(builds);*/
             AuthenticationViewModel = new AuthenticationViewModel(settingsRepository, new AuthenticationService());
         }
 
@@ -126,5 +143,22 @@ namespace Sideloader.ViewModels
                 Logger.Instance.Error("GetBuilds exception", exception);
             }
         }
+
+        public async Task DownloadPackage(AppPackage appPackage)
+        {
+            try
+            {
+                IsBusy = true;
+                await _packageManager.RetrievePackage(appPackage);
+            }
+            catch (Exception exception)
+            {
+                Logger.Instance.Error(exception);
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }        
     }
 }

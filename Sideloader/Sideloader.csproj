@@ -45,6 +45,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -79,7 +80,9 @@
     <Compile Include="Models\AppPackage.cs" />
     <Compile Include="ViewModels\AuthenticationViewModel.cs" />
     <Compile Include="Models\Build.cs" />
+    <Compile Include="Services\IPackageManager.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
+    <Compile Include="Services\PackageManager.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="Views\MainView.xaml.cs">
       <DependentUpon>MainView.xaml</DependentUpon>

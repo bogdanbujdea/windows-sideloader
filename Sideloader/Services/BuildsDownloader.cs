@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
+using Sideloader.Models;
 using Sideloader.Settings;
 using Sideloader.ViewModels;
 
@@ -47,7 +48,8 @@ namespace Sideloader.Services
 
         public List<Build> ExtractBuildsFromHtml(string htmlText)
         {
-            htmlText = File.ReadAllText("builds.html");
+            if (string.IsNullOrWhiteSpace(htmlText))
+                htmlText = File.ReadAllText("builds.html");
             var htmlDocument = new HtmlDocument();
             htmlDocument.LoadHtml(htmlText);
             var builds = new List<Build>();
@@ -64,18 +66,19 @@ namespace Sideloader.Services
                     Debug.WriteLine(node.Name + " : " + node.Attributes);
                     if (IsValidUri(node.Attributes[0].Value))
                     {
-                        var appPackage = new AppPackage() { DownloadUrl = node.Attributes[0].Value };
+                        var decodedUrl = WebUtility.HtmlDecode(node.Attributes[0].Value);
+                        var appPackage = new AppPackage() { DownloadUrl = decodedUrl };
                         if (node.InnerText.Contains("Download (RT)"))
                         {
-                            appPackage.PackageType = PackageType.ARM;
+                            appPackage.Platform = new Platform(PlatformType.ARM);
                         }
                         else if (node.InnerText.Contains("Download (x86)"))
                         {
-                            appPackage.PackageType = PackageType.x86;
+                            appPackage.Platform = new Platform(PlatformType.x86);
                         }
                         else if (node.InnerText.Contains("Download (x64)"))
                         {
-                            appPackage.PackageType = PackageType.x64;
+                            appPackage.Platform = new Platform(PlatformType.x64);
                         }
                         packagesList[htmlNodeCollection[index].InnerText].Add(appPackage);
                     }
@@ -86,15 +89,15 @@ namespace Sideloader.Services
                 var build = new Build { Name = package.Key };
                 foreach (var appPackage in package.Value)
                 {
-                    switch (appPackage.PackageType)
+                    switch (appPackage.Platform.PlatformType)
                     {
-                        case PackageType.ARM:
+                        case PlatformType.ARM:
                             build.ARMBuild = appPackage;
                             break;
-                        case PackageType.x86:
+                        case PlatformType.x86:
                             build.X86Build = appPackage;
                             break;
-                        case PackageType.x64:
+                        case PlatformType.x64:
                             build.X64Build = appPackage;
                             break;
                     }
@@ -104,34 +107,9 @@ namespace Sideloader.Services
             return builds;
         }
 
-        private List<AppPackage> ExtractLinksFromHtml(string htmlText, string ticketNumber)
-        {
-            var downloadLinks = new List<AppPackage>();
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(htmlText);
-            foreach (HtmlNode linkNode in htmlDocument.DocumentNode.SelectNodes("//a[@href]"))
-            {
-                Debug.WriteLine(linkNode.Name + " : " + linkNode.Attributes);
-                var attr =
-                    linkNode.Attributes.FirstOrDefault(a => a.Name == "href" && a.Value.Contains("SWA-" + ticketNumber));
-                if (attr != null)
-                {
-                    if (IsValidUri(attr.Value))
-                    {
-                        var urlDecode = WebUtility.HtmlDecode(attr.Value);
-                        //downloadLinks.Add(new AppPackage(urlDecode));
-                        Debug.WriteLine(attr.Name + " : " + attr.Value);
-                    }
-                }
-            }
-            return downloadLinks;
-        }
-
         private bool IsValidUri(string uri)
         {
             return Uri.IsWellFormedUriString(uri, UriKind.Absolute);
         }
-
-
     }
 }

@@ -25,26 +25,28 @@
                 <Grid x:Name="SearchGrid" Grid.ColumnSpan="4">
                     <TextBox Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Padding="5 0"></TextBox>
                 </Grid>
-                <ItemsControl x:Name="Builds" Grid.Row="2" Grid.Column="0" ItemsSource="{Binding Builds}" Margin="0">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border BorderBrush="Gray" BorderThickness="0 0 0 1" Padding="0 5">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="350"></ColumnDefinition>
-                                        <ColumnDefinition Width="50"></ColumnDefinition>
-                                        <ColumnDefinition Width="50"></ColumnDefinition>
-                                        <ColumnDefinition Width="50"></ColumnDefinition>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="14" TextWrapping="Wrap"></TextBlock>
-                                    <TextBlock Grid.Column="1" Style="{StaticResource PackageTextStyle}" Text="xARM"></TextBlock>
-                                    <TextBlock Grid.Column="2" Style="{StaticResource PackageTextStyle}" Text="x86"></TextBlock>
-                                    <TextBlock Grid.Column="3" Style="{StaticResource PackageTextStyle}" Text="x64"></TextBlock>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                <ScrollViewer Grid.Row="2" Grid.Column="0" Height="450">
+                    <ItemsControl x:Name="Builds" ItemsSource="{Binding Builds}" Margin="0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="Gray" BorderThickness="0 0 0 1" Padding="0 5">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="350"></ColumnDefinition>
+                                            <ColumnDefinition Width="50"></ColumnDefinition>
+                                            <ColumnDefinition Width="50"></ColumnDefinition>
+                                            <ColumnDefinition Width="50"></ColumnDefinition>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="14" TextWrapping="Wrap"></TextBlock>
+                                        <TextBlock Grid.Column="1" Style="{StaticResource PackageTextStyle}" PreviewMouseDown="DownloadArmPackage" Text="ARM"></TextBlock>
+                                        <TextBlock Grid.Column="2" Style="{StaticResource PackageTextStyle}" PreviewMouseDown="Downloadx86Package" Text="x86"></TextBlock>
+                                        <TextBlock Grid.Column="3" Style="{StaticResource PackageTextStyle}" PreviewMouseDown="Downloadx64Package" Text="x64"></TextBlock>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
             </Grid>
         </Grid>
         <Grid x:Name="LoginGrid" Visibility="{Binding AuthenticationViewModel.UserIsLoggedIn, Mode=TwoWay, Converter={StaticResource ReversedBooleanToVisibilityConverter}}">

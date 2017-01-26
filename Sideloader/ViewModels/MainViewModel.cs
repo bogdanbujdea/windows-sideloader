@@ -31,12 +31,13 @@ namespace Sideloader.ViewModels
             };
         }
 
-        public MainViewModel(ISettingsRepository settingsRepository, BuildsDownloader buildsDownloader, IPackageManager packageManager)
+        public MainViewModel(ISettingsRepository settingsRepository, BuildsDownloader buildsDownloader,
+            IPackageManager packageManager)
         {
             _settingsRepository = settingsRepository;
             _buildsDownloader = buildsDownloader;
             _packageManager = packageManager;
-            var builds = _buildsDownloader.ExtractBuildsFromHtml("");
+            /*var builds = _buildsDownloader.ExtractBuildsFromHtml("");
             builds[0] = new Build
             {
                 X86Build =
@@ -48,7 +49,7 @@ namespace Sideloader.ViewModels
                     },
                 Name = "1.5"
             };
-            Builds = new ObservableCollection<Build>(builds);
+            Builds = new ObservableCollection<Build>(builds);*/
             AuthenticationViewModel = new AuthenticationViewModel(settingsRepository, new AuthenticationService());
         }
 
@@ -100,14 +101,32 @@ namespace Sideloader.ViewModels
             if (string.IsNullOrWhiteSpace(SearchText))
                 Builds = new ObservableCollection<Build>(_allBuilds);
             else
-                Builds = new ObservableCollection<Build>(_allBuilds.Where(b => b.Name.ToLower().Contains(SearchText.ToLower())));
+                Builds =
+                    new ObservableCollection<Build>(
+                        _allBuilds.Where(b => b.Name.ToLower().Contains(SearchText.ToLower())));
         }
 
         public async Task LoginUser()
         {
-            var report = await AuthenticationViewModel.Login();
-            if (report.IsSuccessful)
-                await GetBuilds();
+            try
+            {
+                IsBusy = true;
+                StatusMessage = "Logging in...";
+                var report = await AuthenticationViewModel.Login();
+                if (report.IsSuccessful)
+                {
+                    StatusMessage = "Retrieving builds...";
+                    await GetBuilds();
+                }
+            }
+            catch (Exception exception)
+            {
+                Logger.Instance.Error("Login", exception);
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         public async Task Initialize()
@@ -115,6 +134,7 @@ namespace Sideloader.ViewModels
             IsBusy = true;
             try
             {
+                StatusMessage = "Logging in...";
                 var userName = _settingsRepository.GetValue(SettingsKey.Username);
                 var password = _settingsRepository.GetValue(SettingsKey.Password);
                 if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
@@ -124,6 +144,7 @@ namespace Sideloader.ViewModels
                 else
                 {
                     AuthenticationViewModel.UserIsLoggedIn = true;
+                    StatusMessage = "Retrieving builds...";
                     await GetBuilds();
                 }
             }
@@ -140,7 +161,6 @@ namespace Sideloader.ViewModels
         {
             try
             {
-                return;
                 var builds = await _buildsDownloader.GetBuilds();
                 Builds = new ObservableCollection<Build>(builds);
                 _allBuilds = builds.ToList();
@@ -163,9 +183,7 @@ namespace Sideloader.ViewModels
                 IsBusy = true;
                 _packageManager.PackageStatusChanged += StatusChanged;
                 await _packageManager.RetrievePackage(appPackage);
-                var build = Builds.FirstOrDefault(
-                    b => b.X64Build == appPackage || b.X86Build == appPackage || b.ARMBuild == appPackage);
-                MessageBox.Show(build.Name + " was successfully installed!");
+
             }
             catch (PackageException packageException)
             {
@@ -191,6 +209,10 @@ namespace Sideloader.ViewModels
             if (e.MessageType == MessageType.Info)
             {
                 StatusMessage = e.Message;
+            }
+            else if (e.MessageType == MessageType.Success)
+            {
+                MessageBox.Show("The application was successfully installed!");
             }
             else
             {

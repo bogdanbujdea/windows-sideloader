@@ -23,6 +23,7 @@ namespace Sideloader.Services
             InstallDependencies(appPackage);
             OnPackageStatusChanged("Installing package...");
             InstallPackage(appPackage);
+            OnPackageStatusChanged("", MessageType.Success);
         }
 
         private void ExtractZip(string directoryName)
@@ -195,6 +196,7 @@ namespace Sideloader.Services
     public enum MessageType
     {
         Info,
-        Error
+        Error,
+        Success
     }
 }

@@ -24,9 +24,9 @@
                     <RowDefinition Height="30"></RowDefinition>
                     <RowDefinition Height="*"></RowDefinition>
                 </Grid.RowDefinitions>
-                <StackPanel x:Name="SearchGrid" Grid.ColumnSpan="4">
-                    <TextBlock Text="Search" VerticalAlignment="Center" FontWeight="SemiBold" FontFamily="Segoe UI"></TextBlock>
-                    <TextBox Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Padding="2 0"></TextBox>
+                <StackPanel x:Name="SearchGrid" Grid.ColumnSpan="4" Height="60">
+                    <TextBlock Text="Search" VerticalAlignment="Center" FontWeight="SemiBold" Height="30" FontFamily="Segoe UI"></TextBlock>
+                    <TextBox Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="30" VerticalAlignment="Center" Padding="2 3 2 0"></TextBox>
                 </StackPanel>
                 <Grid Grid.Row="2" VerticalAlignment="Top" Height="30">
                     <Grid.ColumnDefinitions>
@@ -62,15 +62,21 @@
                 </ScrollViewer>
             </Grid>
         </Grid>
-        <Grid x:Name="LoginGrid" Height="0" Visibility="{Binding AuthenticationViewModel.UserIsLoggedIn, Mode=TwoWay, Converter={StaticResource ReversedBooleanToVisibilityConverter}}">
+        <Grid x:Name="LoginGrid" Background="White" Visibility="{Binding AuthenticationViewModel.UserIsLoggedIn, Mode=TwoWay, Converter={StaticResource ReversedBooleanToVisibilityConverter}}">
             <Grid x:Name="LoginPanel" DataContext="{Binding AuthenticationViewModel, Mode=TwoWay}">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="50"></RowDefinition>
-                    <RowDefinition Height="50"></RowDefinition>
+                    <RowDefinition Height="80"></RowDefinition>
+                    <RowDefinition Height="80"></RowDefinition>
                     <RowDefinition Height="50"></RowDefinition>
                 </Grid.RowDefinitions>
-                <TextBox x:Name="Username" Text="{Binding Username, Mode=TwoWay}" Margin="10"></TextBox>
-                <PasswordBox x:Name="Password" Grid.Row="1" Margin="10"></PasswordBox>
+                <StackPanel Grid.Row="0" Margin="10 0">
+                    <TextBlock  Text="User"></TextBlock>
+                    <TextBox x:Name="Username" Height="30" Text="{Binding Username, Mode=TwoWay}"></TextBox>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Margin="10">
+                    <TextBlock  Text="Password"></TextBlock>
+                    <PasswordBox x:Name="Password" Height="30"></PasswordBox>
+                </StackPanel>
                 <Button x:Name="LoginButton" Content="Login" Grid.Row="2" Click="Login" Width="200" Margin="10"></Button>
             </Grid>
         </Grid>

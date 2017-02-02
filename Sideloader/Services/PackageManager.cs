@@ -49,6 +49,7 @@ namespace Sideloader.Services
             }
             catch (Exception exception)
             {
+                // The remote server returned an error: (403) Forbidden
                 OnPackageStatusChanged("Package download failed. DevInfo: " + exception.Message, MessageType.Error);
                 throw new PackageException(exception.ToString(), true);
             }
@@ -156,7 +157,15 @@ namespace Sideloader.Services
                         {
                             message = "Please uninstall the application first";
                         }
+                        else if (installInfo.Contains("running scripts is disabled"))
+                        {
+                            message =
+                                "Please allow powershell scripts to be executed on your machine before using this app."
+                                + Environment.NewLine +
+                                "Open Powershall as an administrator, and run this command: Set-ExecutionPolicy -Scope CurrentUser Unrestricted";
+                        }
                         OnPackageStatusChanged(message, MessageType.Error);
+                        throw new PackageException("Package installation failed", true);
                     }
                     using (StreamWriter outfile = new StreamWriter("install_log.txt", true))
                     {

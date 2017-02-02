@@ -51,6 +51,7 @@ namespace Sideloader.ViewModels
             };
             Builds = new ObservableCollection<Build>(builds);*/
             AuthenticationViewModel = new AuthenticationViewModel(settingsRepository, new AuthenticationService());
+            _packageManager.PackageStatusChanged += StatusChanged;
         }
 
         public AuthenticationViewModel AuthenticationViewModel { get; set; }
@@ -181,9 +182,7 @@ namespace Sideloader.ViewModels
             try
             {
                 IsBusy = true;
-                _packageManager.PackageStatusChanged += StatusChanged;
                 await _packageManager.RetrievePackage(appPackage);
-
             }
             catch (PackageException packageException)
             {
